@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
-import cv2
+from PIL import Image  # Remplacer cv2 par PIL
 from keras.models import load_model
 from streamlit_drawable_canvas import st_canvas
 import plotly.graph_objects as go
@@ -20,10 +20,13 @@ def predict_random_image(X_test):
 
 # Fonction pour prédire le chiffre dessiné
 def predict_drawn_image(drawn_image):
-    drawn_image = cv2.resize(drawn_image, (28, 28))
-    drawn_image = cv2.cvtColor(drawn_image, cv2.COLOR_BGR2GRAY)
-    drawn_image = drawn_image.reshape(1, 28, 28, 1)
-    drawn_image = drawn_image / 255.0
+    # Convertir l'image en niveaux de gris avec Pillow
+    drawn_image = Image.fromarray(drawn_image)
+    drawn_image = drawn_image.convert('L')  # Convertir en niveaux de gris
+    drawn_image = drawn_image.resize((28, 28))  # Redimensionner l'image
+    drawn_image = np.array(drawn_image)  # Convertir en tableau numpy
+    drawn_image = drawn_image.reshape(1, 28, 28, 1)  # Reshaper pour le modèle
+    drawn_image = drawn_image / 255.0  # Normaliser
     prediction = model.predict(drawn_image)
     predicted_digit = np.argmax(prediction)
     return predicted_digit, prediction
